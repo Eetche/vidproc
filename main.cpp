@@ -1,6 +1,6 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include "videoprocess.h"
+#include "vidproc/videoprocess.h"
 
 int main()
 {  
@@ -8,7 +8,7 @@ int main()
 
     cv::Mat img = cv::imread("C:/Users/user/Desktop/projects/tosymb/image.jpg");
 
-    std::vector<cv::Point> darkpixels = vidproc.getdarkpixs(img);
+    std::vector<cv::Point3i> darkpixels = vidproc.getwhitepixs(img);
 
     vidproc.tosymb(darkpixels);
 
