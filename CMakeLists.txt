@@ -17,7 +17,11 @@ message(STATUS "    Version: ${OpenCV_VERSION}")
 message(STATUS "    Libraries: ${OpenCV_LIBS}")
 message(STATUS "    Include path: ${OpenCV_INCLUDE_DIRS}")
 
-add_executable(${PROJECT_NAME} main.cpp vidproc/videoprocess.cpp vidproc/videoprocess.h)
+add_executable(${PROJECT_NAME}
+    main.cpp
+    vidproc/videoprocess.cpp
+    vidproc/videoprocess.h
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenCV_LIBS})
 
