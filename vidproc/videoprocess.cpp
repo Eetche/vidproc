@@ -2,7 +2,7 @@
 
 #pragma warning(disable : 4244)
 
-Videoprocess::Videoprocess() : resizeH(60), resizeW(125)
+Videoprocess::Videoprocess()
 {
     cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_WARNING);
 }
@@ -15,7 +15,7 @@ void Videoprocess::video2bin(std::string video_path, std::string outname)
     int height = video.get(cv::CAP_PROP_FRAME_HEIGHT);
     int fps = video.get(cv::CAP_PROP_FPS);
 
-    cv::VideoWriter writer(outname, cv::VideoWriter::fourcc('a', 'v', 'c', '1'), fps, cv::Size(width, height), false);
+    cv::VideoWriter writer("videos/" + outname, cv::VideoWriter::fourcc('a', 'v', 'c', '1'), fps, cv::Size(width, height), false);
 
     cv::Mat frame;
 
@@ -42,15 +42,15 @@ void Videoprocess::video2bin(std::string video_path, std::string outname)
     cv::destroyAllWindows();
 }
 
-std::vector<cv::Point3i> Videoprocess::getwhitepixs(const cv::Mat &frame)
+std::vector<Pixel> Videoprocess::getwhitepixs(const cv::Mat &frame)
 {
     cv::Mat outmat;
 
     cv::cvtColor(frame, outmat, cv::COLOR_BGR2GRAY);
 
-    cv::resize(outmat, outmat, cv::Size(resizeW, resizeH), cv::INTER_AREA);
+    cv::resize(outmat, outmat, cv::Size(RESIZE_W, RESIZE_H), cv::INTER_AREA);
 
-    std::vector<cv::Point3i> whitepixels;
+    std::vector<Pixel> whitepixels;
 
     for (int y = 0; y < outmat.size().height; y++)
     {
@@ -58,7 +58,7 @@ std::vector<cv::Point3i> Videoprocess::getwhitepixs(const cv::Mat &frame)
         {
             uchar pixel = outmat.at<uchar>(y, x);
 
-            if (int(pixel) >= 120)
+            if (int(pixel) >= 40)
             {
                 whitepixels.emplace_back(x, y, pixel);
             }
@@ -68,33 +68,38 @@ std::vector<cv::Point3i> Videoprocess::getwhitepixs(const cv::Mat &frame)
     return whitepixels;
 }
 
-void Videoprocess::tosymb(std::vector<cv::Point3i> whitepixels)
+void Videoprocess::tosymb(const cv::Mat &frame)
 {
 
-    for (int y = 0; y < resizeH; y++)
+    std::vector<Pixel> whitepixels = getwhitepixs(frame);
+
+    for (int y = 0; y < RESIZE_H; y++)
     {
-        for (int x = 0; x < resizeW; x++)
+        for (int x = 0; x < RESIZE_W; x++)
         {
 
             auto it = std::find_if(whitepixels.begin(), whitepixels.end(),
-                                   [x, y](const cv::Point3i &p)
+                                   [x, y](const Pixel &p)
                                    { return p.x == x && p.y == y; });
 
             if (it != whitepixels.end())
             {
-                int brightness = it->z; 
+                int brightness = it->brightness; 
 
                 char symbol;
 
                 if (brightness < 40)
                 {
                      symbol = '.';
-                } else if (brightness < 100)
+                } else if (brightness < 70)
                 {
                      symbol = ':';
-                } else if (brightness < 200)
+                } else if (brightness < 150)
                 {
                     symbol = '*';
+                } else if (brightness < 200)
+                {
+                    symbol = '+';
                 } else if (brightness < 255)
                 {
                     symbol = '#';
@@ -103,12 +108,43 @@ void Videoprocess::tosymb(std::vector<cv::Point3i> whitepixels)
                 }
 
 
-                printf("%c", symbol);
+                putchar(symbol);
 
             } else {
-                printf(" ");
+                putchar(' ');
             }
         }
         printf("\n");
+    }
+}
+
+void Videoprocess::videotosymb(std::string video_path)
+{
+    cv::VideoCapture video(video_path);
+
+    int width = video.get(cv::CAP_PROP_FRAME_WIDTH);
+    int height = video.get(cv::CAP_PROP_FRAME_HEIGHT);
+    int fps = video.get(cv::CAP_PROP_FPS);
+
+    if (!video.isOpened())
+    {
+        std::cerr << "video.isOpened() error";
+    }
+
+    cv::Mat frame;
+
+    for (;;)
+    {
+        video >> frame;
+
+        if (frame.empty())
+        {
+            break;
+        }
+
+
+        tosymb(frame);
+
+        system("cls");
     }
 }
