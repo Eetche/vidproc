@@ -4,13 +4,9 @@
 
 int main()
 {  
-    Videoprocess vidproc;
+    cv::Mat img = cv::imread("image.jpg");
 
-    cv::Mat img = cv::imread("C:/Users/user/Desktop/projects/tosymb/image.jpg");
-
-    std::vector<cv::Point3i> darkpixels = vidproc.getwhitepixs(img);
-
-    vidproc.tosymb(darkpixels);
+    Videoprocess::tosymb(img);
 
     return 0;
 }
