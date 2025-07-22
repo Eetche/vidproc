@@ -88,13 +88,10 @@ void Videoprocess::tosymb(const cv::Mat &frame)
 
                 char symbol;
 
-                if (brightness < 40)
+                if (brightness < 100)
                 {
                      symbol = '.';
-                } else if (brightness < 70)
-                {
-                     symbol = ':';
-                } else if (brightness < 150)
+                }  else if (brightness < 150)
                 {
                     symbol = '*';
                 } else if (brightness < 200)
@@ -107,7 +104,6 @@ void Videoprocess::tosymb(const cv::Mat &frame)
                     symbol = ' ';
                 }
 
-
                 putchar(symbol);
 
             } else {
@@ -118,9 +114,10 @@ void Videoprocess::tosymb(const cv::Mat &frame)
     }
 }
 
-void Videoprocess::videotosymb(std::string video_path)
+void Videoprocess::videotosymb(cv::VideoCapture video)
 {
-    cv::VideoCapture video(video_path);
+
+    std::string canvas;
 
     int width = video.get(cv::CAP_PROP_FRAME_WIDTH);
     int height = video.get(cv::CAP_PROP_FRAME_HEIGHT);
